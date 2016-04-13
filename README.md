@@ -1,7 +1,7 @@
 # AutoGrid
 
 The vanilla JavaScript ES6 minimalistic adaptive layout module for your content. The solution which
-"just works" --- enable the AutoGrid and go further.
+"just works" – enable the AutoGrid and go further.
 
 Preview
 -------
