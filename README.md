@@ -1,8 +1,26 @@
 # AutoGrid
-The vanilla JavaScript ES6 minimalistic layout module for your content.
+
+The vanilla JavaScript ES6 minimalistic adaptive layout module for your content. The solution which
+"just works" --- enable the AutoGrid and go further.
+
+Preview
+-------
+
+The sample of how the AutoGrid automatic layout works:
+
+![Preview](https://cloud.githubusercontent.com/assets/4989256/14505269/1aa25c46-01c1-11e6-8841-da808192ea99.png)
+
+Features
+--------
+
++ Automatic layout for desktop and mobile devices (3 columns for 1366x768, 5 columns for 1920x1080);
++ Very simple usage and binding;
++ Fast layout;
++ Cards width customizable size;
++ The only thing you need is to style the grid with CSS.
 
 Installation
----
+------------
 
 You can just take ready-to-use `index.js` file from this repository.
 But the better way would be to clone this repository as a git submodule into your project:
@@ -16,7 +34,7 @@ git submodule add https://github.com/ZitRos/AutoGrid.git source/client/js/AutoGr
 is the sub-directory **in your project** where this repository will be cloned.
 
 Usage
----
+-----
 
 Define an empty container in which auto-aligned cards will be placed: 
 ```html
@@ -82,14 +100,14 @@ Styling sample (SCSS):
 API
 ---
 
-+ AutoGrid(container)
-    + applyChild(element, [options])
-    + childExists(element)
-    + clear()
-    + disable()
-    + updateChild(element, options)
-    + updateGrid()
-    + updateSizes()
++ [AutoGrid(container)](#autogridcontainer)
+    + [applyChild(element, [options])](#applychildelement-options)
+    + [childExists(element)](#childexistselement)
+    + [clear()](#clear)
+    + [disable()](#disable)
+    + [updateChild(element, options)](#updatechildelement-options)
+    + [updateGrid()](#updategrid)
+    + [updateSizes()](#updatesizes)
     
 ##### AutoGrid(container)
 Constructor. `container` is the block nesting the grid elements. Note that `container`'s `position`
@@ -125,3 +143,8 @@ after.
 ##### updateSizes()
 Call this function if the layout was updated and AutoGrid for some reasons were not able to detect
 this update.
+
+Development
+-----------
+
+Feel free to open pull requests and create issues or feature requests.
