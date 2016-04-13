@@ -62,6 +62,11 @@ AutoGrid.prototype.disable = function () {
 
 };
 
+/**
+ * Returns if child element applied to this grid is still applied to it.
+ * @param element
+ * @returns {boolean}
+ */
 AutoGrid.prototype.childExists = function (element) {
 
     return !!this.children.filter((e) => element === e.element).length;
@@ -118,6 +123,10 @@ AutoGrid.prototype.updateChild = function (element, options) {
 
 };
 
+/**
+ * Call this function if any of the grid elements was updated. You don't need to call updateSizes
+ * after.
+ */
 AutoGrid.prototype.updateGrid = function () {
 
     let i, columnWidth = Math.floor(this.width / this.COLUMNS),
@@ -212,6 +221,10 @@ AutoGrid.prototype.updateGrid = function () {
 
 };
 
+/**
+ * Call this function if the layout was updated and AutoGrid for some reasons were not able to
+ * detect this update.
+ */
 AutoGrid.prototype.updateSizes = function () {
 
     if (this.width === this.container.offsetWidth) return;
