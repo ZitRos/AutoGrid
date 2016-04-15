@@ -82,6 +82,12 @@
          */
         this.children = [];
 
+        /**
+         * Holds the grid update timeout to prevent frequent grid updating.
+         * @type {number}
+         */
+        this.GRID_UPDATE_TICK = 0;
+
         [].slice.call(container.childNodes).forEach(function (e) {
             if (!(e instanceof HTMLElement)) {
                 container.removeChild(e);
@@ -194,12 +200,26 @@
     AutoGrid.prototype.updateGrid = function () {
         var _this2 = this;
 
+        if (this.GRID_UPDATE_TICK) return;
+        this.GRID_UPDATE_TICK = setTimeout(function () {
+            _this2.GRID_UPDATE_TICK = 0;
+            _this2._updateGrid();
+        }, 1);
+    };
+
+    /**
+     * This is a private updateGrid function for immediate grid updating.
+     * @private
+     */
+    AutoGrid.prototype._updateGrid = function () {
+        var _this3 = this;
+
         var i = void 0,
                 columnWidth = Math.floor(this.width / this.COLUMNS),
                 columnHeights = function () {
                     var arr = [],
                             i = void 0;
-                    for (i = 0; i < _this2.COLUMNS; i++) {
+                    for (i = 0; i < _this3.COLUMNS; i++) {
                         arr.push(0);
                     }return arr;
                 }();
@@ -247,8 +267,8 @@
 
         var _loop = function _loop() {
 
-            var block = _this2.children[i];
-            var colSpan = Math.min(block.width || 1, _this2.COLUMNS),
+            var block = _this3.children[i];
+            var colSpan = Math.min(block.width || 1, _this3.COLUMNS),
                     colIndices = getNextColumnIndices(colSpan),
                     minTop = Math.max.apply(Math, colIndices.map(function (i) {
                         return columnHeights[i];
@@ -260,7 +280,7 @@
                 block.container.style.left = left;
                 block.container.style.top = top;
                 block.container.style.width = columnWidth * colSpan + "px";
-                _this2.container.appendChild(block.container);
+                _this3.container.appendChild(block.container);
             } else {
                 if (block.container.style.left !== left) block.container.style.left = left;
                 if (block.container.style.top !== top) block.container.style.top = top;
@@ -275,8 +295,8 @@
             // container. To prevent inset containers from flowing we need to recalculate sizes as
             // soon as we noticed size change. This won't take a lot of resources as not many cards
             // needed to trigger scrollbar appear.
-            if (_this2.width !== _this2.container.offsetWidth) {
-                _this2.updateSizes();
+            if (_this3.width !== _this3.container.offsetWidth) {
+                _this3.updateSizes();
                 return {
                     v: void 0
                 };

@@ -6,6 +6,7 @@ export default AutoGrid;
  * the best layout for you.
  * NOTE. AutoGrid will turn container's position to relative.
  * @author Nikita Savchenko aka ZitRo (zitros.lab@gmail.com) (github.com/ZitRos)
+ * @version 1.1.0
  * @param {HTMLElement} container - Block that contains blocks to align.
  */
 function AutoGrid (container) {
@@ -24,6 +25,12 @@ function AutoGrid (container) {
      * @type {{ element: HTMLElement, container: HTMLElement, [width]: number=1 }[]}
      */
     this.children = [];
+
+    /**
+     * Holds the grid update timeout to prevent frequent grid updating.
+     * @type {number}
+     */
+    this.GRID_UPDATE_TICK = 0;
 
     [].slice.call(container.childNodes).forEach((e) => {
         if (!(e instanceof HTMLElement)) {
@@ -136,6 +143,21 @@ AutoGrid.prototype.updateChild = function (element, options) {
  * after.
  */
 AutoGrid.prototype.updateGrid = function () {
+    
+    if (this.GRID_UPDATE_TICK)
+        return;
+    this.GRID_UPDATE_TICK = setTimeout(() => {
+        this.GRID_UPDATE_TICK = 0;
+        this._updateGrid();
+    }, 1);
+    
+};
+
+/**
+ * This is a private updateGrid function for immediate grid updating.
+ * @private
+ */
+AutoGrid.prototype._updateGrid = function () {
 
     let i, columnWidth = Math.floor(this.width / this.COLUMNS),
         columnHeights = (() => {
