@@ -87,13 +87,13 @@ This will result with the next HTML on which you can apply any styles you want:
 ```
 
 **NOTE:** You can animate AutoGrid blocks (`.AutoGrid-container` class), but **do not** add `height`
-property transition, this may have unexpected result due to AutoGrid size update. Do not add any
-margin or padding to this class as well, style the nested container instead.
+and `width` properties transition, this may have unexpected result due to AutoGrid size update.
+Do not add any margin or padding to this class as well, style the nested container instead.
 Styling sample (SCSS):
 
 ```css
 .AutoGrid-container {
-    transition: left .3s ease, top .3s ease, width .3s ease;
+    transition: left .3s ease, top .3s ease;
 }
 ```
 

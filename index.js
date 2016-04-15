@@ -25,6 +25,14 @@ function AutoGrid (container) {
      */
     this.children = [];
 
+    [].slice.call(container.childNodes).forEach((e) => {
+        if (!(e instanceof HTMLElement)) {
+            container.removeChild(e);
+            return;
+        }
+        this.applyChild(e);
+    });
+
     let resizeTimer = 0; // not to perform resize too frequently
     this.windowResizeHandler = () => {
         if (resizeTimer) clearTimeout(resizeTimer);

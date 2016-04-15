@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AutoGrid example</title>
+    <style type="text/css">
+        html, body {
+            background: #eee;
+        }
+        .AutoGrid-container {
+            transition: left .3s ease, top .3s ease;
+        }
+        .card {
+            background: #fff;
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .5);
+            margin: .3em;
+            padding: .1em .7em;
+        }
+    </style>
+</head>
+<body onload="init()">
+    <div id="container">
+        <div class="card">
+            <h1>First card</h1>
+            <p>
+                This is the first card that appears on the beginning. This card has some additional
+                text.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function init () {
+
+            var grid = new AutoGrid(document.getElementById("container")),
+                div, p, h;
+
+            for (var i = 0; i < 10; i++) {
+                div = document.createElement("div");
+                div.className = "card";
+                p = document.createElement("p");
+                h = document.createElement("h1");
+                h.textContent = "Card #" + i;
+                p.textContent = "This is a description for the card number " + i;
+                div.appendChild(h);
+                div.appendChild(p);
+                grid.applyChild(div);
+            }
+
+        }
+    </script>
+
+<!-- AutoGrid ES6 to ES5 compiled with babel -->
+<script type="text/javascript">
+    "use strict";
+
+    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+    /**
+     * AutoGrid - responsive, adaptive automatic layout that just works for you. Everything you have to
+     * do is to create AutoGrid instance with argument of container element, and AutoGrid will align
+     * the best layout for you.
+     * NOTE. AutoGrid will turn container's position to relative.
+     * @author Nikita Savchenko aka ZitRo (zitros.lab@gmail.com) (github.com/ZitRos)
+     * @param {HTMLElement} container - Block that contains blocks to align.
+     */
+    function AutoGrid(container) {
+        var _this = this;
+
+        if (!(container instanceof HTMLElement)) throw new Error("container (" + container + ") is not HTML element.");
+
+        container.style.position = "relative";
+
+        this.container = container;
+        this.width = container.offsetWidth;
+        this.COLUMNS = getColumnsNumber(this.width);
+
+        /**
+         * This array holds sorted grid elements. Container is a wrapper for the element.
+         * @type {{ element: HTMLElement, container: HTMLElement, [width]: number=1 }[]}
+         */
+        this.children = [];
+
+        [].slice.call(container.childNodes).forEach(function (e) {
+            if (!(e instanceof HTMLElement)) {
+                container.removeChild(e);
+                return;
+            }
+            _this.applyChild(e);
+        });
+
+        var resizeTimer = 0; // not to perform resize too frequently
+        this.windowResizeHandler = function () {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+                return _this.updateSizes();
+            }, 200);
+        };
+        window.addEventListener("resize", this.windowResizeHandler);
+    }
+
+    function getColumnsNumber(width) {
+        return Math.max(1, Math.round(width / 400));
+    }
+
+    /**
+     * Removes all children.
+     */
+    AutoGrid.prototype.clear = function () {
+        this.children = this.children.filter(function (_ref) {
+            var container = _ref.container;
+
+            if (container.parentNode) container.parentNode.removeChild(container);
+            return false;
+        });
+    };
+
+    /**
+     * This function disables AutoGrid automatic layout.
+     */
+    AutoGrid.prototype.disable = function () {
+
+        if (!this.windowResizeHandler) return;
+
+        window.removeEventListener("resize", this.windowResizeHandler);
+        this.windowResizeHandler = null;
+        this.container = null;
+    };
+
+    /**
+     * Returns if child element applied to this grid is still applied to it.
+     * @param element
+     * @returns {boolean}
+     */
+    AutoGrid.prototype.childExists = function (element) {
+
+        return !!this.children.filter(function (e) {
+            return element === e.element;
+        }).length;
+    };
+
+    /**
+     * @param {HTMLElement} element
+     * @param {*} [options] - Additional options like { width: 2 }.
+     */
+    AutoGrid.prototype.applyChild = function (element, options) {
+
+        if (this.childExists(element)) return;
+
+        var container = document.createElement("div"),
+                obj = {
+                    element: element,
+                    container: container,
+                    width: 1
+                };
+
+        container.className = "AutoGrid-container";
+        container.style.position = "absolute";
+        container.appendChild(element);
+        Object.assign(obj, options || {});
+
+        this.children.push(obj);
+
+        this.updateGrid();
+    };
+
+    /**
+     * @param {HTMLElement} element
+     * @param {*} options - Additional options like { width: 2 }.
+     * @returns {boolean} - Success of update (if the element is found).
+     */
+    AutoGrid.prototype.updateChild = function (element, options) {
+
+        var updated = null;
+
+        this.children.forEach(function (c) {
+            if (c !== element) return;
+            updated = c;
+        });
+
+        if (updated) {
+            Object.assign(updated, options);
+            this.updateGrid();
+        }
+
+        return !!updated;
+    };
+
+    /**
+     * Call this function if any of the grid elements was updated. You don't need to call updateSizes
+     * after.
+     */
+    AutoGrid.prototype.updateGrid = function () {
+        var _this2 = this;
+
+        var i = void 0,
+                columnWidth = Math.floor(this.width / this.COLUMNS),
+                columnHeights = function () {
+                    var arr = [],
+                            i = void 0;
+                    for (i = 0; i < _this2.COLUMNS; i++) {
+                        arr.push(0);
+                    }return arr;
+                }();
+
+        /**
+         * WIDTH = 3
+         * C1 C2 C3 C4 C5
+         * ## ## ## ## ##
+         * ## ##    ##
+         * ##       ##
+         * (______) ##
+         *
+         * This function returns sorted array of column indices to fill the grid.
+         */
+        function getNextColumnIndices(colSpan) {
+            var iArr = Array.from({ length: columnHeights.length }, function (v, k) {
+                        return k;
+                    }).sort(function (i1, i2) {
+                        if (columnHeights[i1] === columnHeights[i2]) return 0;
+                        return columnHeights[i1] > columnHeights[i2] ? 1 : -1;
+                    }),
+                    rArr = void 0;
+            for (var _i = colSpan; _i <= iArr.length; _i++) {
+                rArr = iArr.slice(0, _i).sort();
+                var c = 1,
+                        u = void 0;
+                for (u = 1; u < rArr.length; u++) {
+                    if (rArr[u - 1] + 1 === rArr[u]) {
+                        if (++c === colSpan) {
+                            u++;
+                            break;
+                        }
+                    } else {
+                        c = 1;
+                    }
+                }if (c === colSpan) {
+                    rArr = rArr.slice(u - colSpan, u);
+                    break;
+                }
+            }
+            return rArr ? rArr : Array.from({ length: columnHeights.length }, function (v, k) {
+                return k;
+            });
+        }
+
+        var _loop = function _loop() {
+
+            var block = _this2.children[i];
+            var colSpan = Math.min(block.width || 1, _this2.COLUMNS),
+                    colIndices = getNextColumnIndices(colSpan),
+                    minTop = Math.max.apply(Math, colIndices.map(function (i) {
+                        return columnHeights[i];
+                    })),
+                    left = colIndices[0] * columnWidth + "px",
+                    top = minTop + "px";
+
+            if (!block.container.parentNode) {
+                block.container.style.left = left;
+                block.container.style.top = top;
+                block.container.style.width = columnWidth * colSpan + "px";
+                _this2.container.appendChild(block.container);
+            } else {
+                if (block.container.style.left !== left) block.container.style.left = left;
+                if (block.container.style.top !== top) block.container.style.top = top;
+                if (block.container.style.width !== columnWidth + "px") block.container.style.width = columnWidth * colSpan + "px";
+            }
+
+            colIndices.forEach(function (index) {
+                columnHeights[index] = minTop + block.container.offsetHeight;
+            });
+
+            // Adding/updating of nodes may cause scrollbar to appear. This changes the width of the
+            // container. To prevent inset containers from flowing we need to recalculate sizes as
+            // soon as we noticed size change. This won't take a lot of resources as not many cards
+            // needed to trigger scrollbar appear.
+            if (_this2.width !== _this2.container.offsetWidth) {
+                _this2.updateSizes();
+                return {
+                    v: void 0
+                };
+            }
+        };
+
+        for (i = 0; i < this.children.length; i++) {
+            var _ret = _loop();
+
+            if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
+        }
+
+        this.container.style.height = columnHeights.reduce(function (a, b) {
+                    return Math.max(a, b);
+                }) + "px";
+
+        // Yet another check required in case the height of the block is reduced and scrollbar
+        // disappears.
+        if (this.width !== this.container.offsetWidth) {
+            this.updateSizes();
+        }
+    };
+
+    /**
+     * Call this function if the layout was updated and AutoGrid for some reasons were not able to
+     * detect this update.
+     */
+    AutoGrid.prototype.updateSizes = function () {
+
+        if (this.width === this.container.offsetWidth) return;
+
+        this.width = this.container.offsetWidth;
+        this.COLUMNS = getColumnsNumber(this.width);
+
+        this.updateGrid();
+    };
+</script>
+</body>
+</html>
