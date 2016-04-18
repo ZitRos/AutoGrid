@@ -1,4 +1,4 @@
-# AutoGrid <sup>v1.1.0</sup>
+# AutoGrid <sup>v1.1.2</sup>
 
 The vanilla JavaScript ES6 minimalistic adaptive layout module for your content. The solution which
 "just works" – enable the AutoGrid and go further.

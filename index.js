@@ -6,7 +6,7 @@ export default AutoGrid;
  * the best layout for you.
  * NOTE. AutoGrid will turn container's position to relative.
  * @author Nikita Savchenko aka ZitRo (zitros.lab@gmail.com) (github.com/ZitRos)
- * @version 1.1.0
+ * @version 1.1.2
  * @param {HTMLElement} container - Block that contains blocks to align.
  */
 function AutoGrid (container) {
@@ -124,7 +124,7 @@ AutoGrid.prototype.updateChild = function (element, options) {
     let updated = null;
 
     this.children.forEach(c => {
-        if (c !== element)
+        if (c.element !== element)
             return;
         updated = c;
     });
@@ -154,7 +154,7 @@ AutoGrid.prototype.updateGrid = function () {
 };
 
 /**
- * This is a private updateGrid function for immediate grid updating.
+ * This is a private updateGrid function for immediate grid update.
  * @private
  */
 AutoGrid.prototype._updateGrid = function () {
@@ -222,8 +222,8 @@ AutoGrid.prototype._updateGrid = function () {
                 block.container.style.left = left;
             if (block.container.style.top !== top)
                 block.container.style.top = top;
-            if (block.container.style.width !== columnWidth + "px")
-                block.container.style.width = columnWidth * colSpan + "px";
+            if (block.container.style.width !== (columnWidth * colSpan) + "px")
+                block.container.style.width = (columnWidth * colSpan) + "px";
         }
 
         colIndices.forEach(index => {

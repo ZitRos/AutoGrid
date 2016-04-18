@@ -48,6 +48,8 @@
                 grid.applyChild(div);
             }
 
+            window.autoGrid = grid;
+
         }
     </script>
 
@@ -181,7 +183,7 @@
         var updated = null;
 
         this.children.forEach(function (c) {
-            if (c !== element) return;
+            if (c.element !== element) return;
             updated = c;
         });
 
@@ -284,7 +286,7 @@
             } else {
                 if (block.container.style.left !== left) block.container.style.left = left;
                 if (block.container.style.top !== top) block.container.style.top = top;
-                if (block.container.style.width !== columnWidth + "px") block.container.style.width = columnWidth * colSpan + "px";
+                if (block.container.style.width !== columnWidth * colSpan + "px") block.container.style.width = columnWidth * colSpan + "px";
             }
 
             colIndices.forEach(function (index) {
