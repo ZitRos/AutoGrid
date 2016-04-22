@@ -6,7 +6,7 @@ export default AutoGrid;
  * the best layout for you.
  * NOTE. AutoGrid will turn container's position to relative.
  * @author Nikita Savchenko aka ZitRo (zitros.lab@gmail.com) (github.com/ZitRos)
- * @version 1.1.2
+ * @version 1.2.0
  * @param {HTMLElement} container - Block that contains blocks to align.
  */
 function AutoGrid (container) {
@@ -52,6 +52,25 @@ function AutoGrid (container) {
 function getColumnsNumber (width) {
     return Math.max(1, Math.round(width / 400));
 }
+
+/**
+ * Returns element attached to the grid or null if no such element were attached.
+ * @private
+ * @returns {*} - AutoGrid.children
+ */
+AutoGrid.prototype.getChild = function (element) {
+
+    let el = null;
+
+    this.children.forEach(c => {
+        if (c.element !== element)
+            return;
+        el = c;
+    });
+
+    return el;
+
+};
 
 /**
  * Removes all children.
@@ -116,18 +135,41 @@ AutoGrid.prototype.applyChild = function (element, options) {
 
 /**
  * @param {HTMLElement} element
+ * @param {HTMLElement} newElement
+ * @param {boolean=true} keepOptions - if it is needed to keep the same options of the element
+ *                                     to be replaced.
+ * @returns {boolean} success of the operation
+ */
+AutoGrid.prototype.replaceChild = function (element, newElement, keepOptions = true) {
+
+    let child = this.getChild(element);
+
+    if (!child || !child.element.parentNode)
+        return false;
+
+    child.element.parentNode.replaceChild(newElement, child.element);
+    child.element = newElement;
+
+    if (!keepOptions) {
+        this.children[this.children.indexOf(child.element)] = {
+            element: newElement,
+            container: child.container,
+            width: 1
+        };
+    }
+
+    return true;
+    
+};
+
+/**
+ * @param {HTMLElement} element
  * @param {*} options - Additional options like { width: 2 }.
  * @returns {boolean} - Success of update (if the element is found).
  */
 AutoGrid.prototype.updateChild = function (element, options) {
 
-    let updated = null;
-
-    this.children.forEach(c => {
-        if (c.element !== element)
-            return;
-        updated = c;
-    });
+    let updated = this.getChild(element);
 
     if (updated) {
         Object.assign(updated, options);

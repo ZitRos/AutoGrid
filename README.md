@@ -1,4 +1,4 @@
-# AutoGrid <sup>v1.1.2</sup>
+# AutoGrid <sup>v1.2.0</sup>
 
 The vanilla JavaScript ES6 minimalistic adaptive layout module for your content. The solution which
 "just works" – enable the AutoGrid and go further.
@@ -105,6 +105,7 @@ API
     + [childExists(element)](#childexistselement)
     + [clear()](#clear)
     + [disable()](#disable)
+    + [replaceChild(oldChild, newChild, keepOptions)](#replacechildoldchildnewchildkeepoptions)
     + [updateChild(element, options)](#updatechildelement-options)
     + [updateGrid()](#updategrid)
     + [updateSizes()](#updatesizes)
@@ -132,6 +133,10 @@ Removes any children of the grid.
 
 ##### disable()
 Removes any event listeners attached by the `AutoGrid`.
+
+##### replaceChild(oldChild, newChild, keepOptions)
+Replaces child attached to the grid. `keepOptions` is true by default, switch it to reset grid
+element options.
 
 ##### updateChild(element, options)
 Updates child's `options`. For the `options` specification, see applyChild function.
