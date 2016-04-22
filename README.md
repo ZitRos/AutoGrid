@@ -105,7 +105,7 @@ API
     + [childExists(element)](#childexistselement)
     + [clear()](#clear)
     + [disable()](#disable)
-    + [replaceChild(oldChild, newChild, keepOptions)](#replacechildoldchildnewchildkeepoptions)
+    + [replaceChild(oldChild, newChild, keepOptions)](#replacechildoldchild-newchild-keepoptions)
     + [updateChild(element, options)](#updatechildelement-options)
     + [updateGrid()](#updategrid)
     + [updateSizes()](#updatesizes)
