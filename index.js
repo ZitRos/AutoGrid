@@ -8,17 +8,22 @@ export default AutoGrid;
  * @author Nikita Savchenko aka ZitRo (zitros.lab@gmail.com) (github.com/ZitRos)
  * @version 1.2.0
  * @param {HTMLElement} container - Block that contains blocks to align.
+ * @param {Object} [setup] - Configuration of the grid.
+ * @param {number = 400} [setup.targetCellWidth] - Target width of the grid column in pixels.
+ * @param {number = 1} [setup.cellWidth] - Relative cell with to the target width.
  */
-function AutoGrid (container) {
+
+function AutoGrid (container, setup = {}) {
 
     if (!(container instanceof HTMLElement))
         throw new Error(`container (${container}) is not HTML element.`);
 
     container.style.position = "relative";
 
+    this.CELL_WIDTH = (setup.targetCellWidth || 400) * (setup.cellWidth || 1);
     this.container = container;
     this.width = container.offsetWidth;
-    this.COLUMNS = getColumnsNumber(this.width);
+    this.COLUMNS = getColumnsNumber(this.width, this.CELL_WIDTH);
 
     /**
      * This array holds sorted grid elements. Container is a wrapper for the element.
@@ -47,11 +52,32 @@ function AutoGrid (container) {
     };
     window.addEventListener("resize", this.windowResizeHandler);
 
+    if (!this.supported())
+        return;
+
+    /**
+     * @type {MutationObserver}
+     * @private
+     */
+    this._observer = new MutationObserver((mutations) => mutations.forEach(() => {
+        this.updateGrid();
+    }));
+
+    this._observer.observe(container, { childList: true, subtree: true });
+
 }
 
-function getColumnsNumber (width) {
-    return Math.max(1, Math.round(width / 400));
+function getColumnsNumber (width, cellWidth = 400) {
+    return Math.max(1, Math.round(width / cellWidth));
 }
+
+/**
+ * Returns if AutoGrid is supported by the browser.
+ * @returns {boolean}
+ */
+AutoGrid.prototype.supported = function () {
+    return !!MutationObserver;
+};
 
 /**
  * Returns element attached to the grid or null if no such element were attached.
@@ -93,6 +119,9 @@ AutoGrid.prototype.disable = function () {
     window.removeEventListener("resize", this.windowResizeHandler);
     this.windowResizeHandler = null;
     this.container = null;
+
+    if (this._observer)
+        this._observer.disconnect();
 
 };
 
@@ -183,6 +212,8 @@ AutoGrid.prototype.updateChild = function (element, options) {
 /**
  * Call this function if any of the grid elements was updated. You don't need to call updateSizes
  * after.
+ * This function may be called a lot of times once, it won't trigger the actual update. It will be
+ * triggered by the next frame.
  */
 AutoGrid.prototype.updateGrid = function () {
     
@@ -289,6 +320,7 @@ AutoGrid.prototype._updateGrid = function () {
     // disappears.
     if (this.width !== this.container.offsetWidth) {
         this.updateSizes();
+        return;
     }
 
 };
@@ -302,7 +334,7 @@ AutoGrid.prototype.updateSizes = function () {
     if (this.width === this.container.offsetWidth) return;
 
     this.width = this.container.offsetWidth;
-    this.COLUMNS = getColumnsNumber(this.width);
+    this.COLUMNS = getColumnsNumber(this.width, this.CELL_WIDTH);
 
     this.updateGrid();
 
