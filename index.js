@@ -217,12 +217,12 @@ AutoGrid.prototype.updateChild = function (element, options) {
  */
 AutoGrid.prototype.updateGrid = function () {
     
-    if (this.GRID_UPDATE_TICK)
-        return;
-    this.GRID_UPDATE_TICK = setTimeout(() => {
-        this.GRID_UPDATE_TICK = 0;
-        this._updateGrid();
-    }, 1);
+    // if (this.GRID_UPDATE_TICK)
+    //     return;
+    // this.GRID_UPDATE_TICK = setTimeout(() => {
+    //     this.GRID_UPDATE_TICK = 0;
+    this._updateGrid();
+    // }, 1);
     
 };
 
