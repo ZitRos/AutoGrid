@@ -31,12 +31,6 @@ function AutoGrid (container, setup = {}) {
      */
     this.children = [];
 
-    /**
-     * Holds the grid update timeout to prevent frequent grid updating.
-     * @type {number}
-     */
-    this.GRID_UPDATE_TICK = 0;
-
     [].slice.call(container.childNodes).forEach((e) => {
         if (!(e instanceof HTMLElement)) {
             container.removeChild(e);
@@ -212,25 +206,9 @@ AutoGrid.prototype.updateChild = function (element, options) {
 /**
  * Call this function if any of the grid elements was updated. You don't need to call updateSizes
  * after.
- * This function may be called a lot of times once, it won't trigger the actual update. It will be
- * triggered by the next frame.
- */
-AutoGrid.prototype.updateGrid = function () {
-    
-    // if (this.GRID_UPDATE_TICK)
-    //     return;
-    // this.GRID_UPDATE_TICK = setTimeout(() => {
-    //     this.GRID_UPDATE_TICK = 0;
-    this._updateGrid();
-    // }, 1);
-    
-};
-
-/**
- * This is a private updateGrid function for immediate grid update.
  * @private
  */
-AutoGrid.prototype._updateGrid = function () {
+AutoGrid.prototype.updateGrid = function () {
 
     let i, columnWidth = Math.floor(this.width / this.COLUMNS),
         columnHeights = (() => {
