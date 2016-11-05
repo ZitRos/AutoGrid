@@ -53,7 +53,7 @@ function AutoGrid (container, setup = {}) {
      * @type {MutationObserver}
      * @private
      */
-    this._observer = new MutationObserver((mutations) => mutations.forEach(() => {
+    this._observer = new MutationObserver((mutations) => mutations.forEach((e) => {
         this.updateGrid();
     }));
 
@@ -63,6 +63,12 @@ function AutoGrid (container, setup = {}) {
 
 function getColumnsNumber (width, cellWidth = 400) {
     return Math.max(1, Math.round(width / cellWidth));
+}
+
+function isVisible (elm) {
+    var rect = elm.getBoundingClientRect();
+    var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+    return !(rect.bottom < 0 || rect.top - viewHeight >= 0 || rect.right - rect.left === 0);
 }
 
 /**
@@ -142,6 +148,7 @@ AutoGrid.prototype.applyChild = function (element, options) {
         obj = {
             element: element,
             container: container,
+            lastContainerHeight: 0,
             width: 1
         };
 
@@ -210,6 +217,10 @@ AutoGrid.prototype.updateChild = function (element, options) {
  */
 AutoGrid.prototype.updateGrid = function () {
 
+    if (!isVisible(this.container)) {
+        return;
+    }
+
     let i, columnWidth = Math.floor(this.width / this.COLUMNS),
         columnHeights = (() => {
             let arr = [], i;
@@ -254,13 +265,28 @@ AutoGrid.prototype.updateGrid = function () {
         return rArr ? rArr : Array.from({ length: columnHeights.length }, (v, k) => k);
     }
 
+    let leftFix,
+        inds = [],
+        mx = 0;
+
+    for (i = 0; i < this.children.length; i++) {
+        let block = this.children[i],
+            colSpan = Math.min(block.width || 1, this.COLUMNS),
+            ind = getNextColumnIndices(colSpan);
+        inds.push(ind);
+        if (ind[0] + colSpan > mx)
+            mx = ind[0] + colSpan;
+    }
+
+    leftFix = (this.COLUMNS - mx) * columnWidth / 2;
+
     for (i = 0; i < this.children.length; i++) {
 
-        let block = this.children[i];
-        let colSpan = Math.min(block.width || 1, this.COLUMNS),
-            colIndices = getNextColumnIndices(colSpan),
+        let block = this.children[i],
+            colSpan = Math.min(block.width || 1, this.COLUMNS),
+            colIndices = inds[i],
             minTop = Math.max.apply(Math, colIndices.map(i => columnHeights[i])),
-            left = colIndices[0] * columnWidth + "px",
+            left = colIndices[0] * columnWidth + leftFix + "px",
             top = minTop + "px";
 
         if (!block.container.parentNode) {
