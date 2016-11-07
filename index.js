@@ -27,7 +27,12 @@ function AutoGrid (container, setup = {}) {
 
     /**
      * This array holds sorted grid elements. Container is a wrapper for the element.
-     * @type {{ element: HTMLElement, container: HTMLElement, [width]: number=1 }[]}
+     * @type {{
+     *  element: HTMLElement,
+     *  container: HTMLElement,
+     *  [width]: number=1,
+     *  [onResizeCallback]: function[]
+     *  }[]}
      */
     this.children = [];
 
@@ -148,8 +153,9 @@ AutoGrid.prototype.applyChild = function (element, options) {
         obj = {
             element: element,
             container: container,
-            lastContainerHeight: 0,
-            width: 1
+            width: 1,
+            lastWidth: 1,
+            onResizeCallback: []
         };
 
     container.className = "AutoGrid-container";
@@ -184,7 +190,9 @@ AutoGrid.prototype.replaceChild = function (element, newElement, keepOptions = t
         this.children[this.children.indexOf(child.element)] = {
             element: newElement,
             container: child.container,
-            width: 1
+            width: 1,
+            lastWidth: 1,
+            onResizeCallback: child.onResizeCallback
         };
     }
 
@@ -193,6 +201,7 @@ AutoGrid.prototype.replaceChild = function (element, newElement, keepOptions = t
 };
 
 /**
+ * Updates child options, for example, width.
  * @param {HTMLElement} element
  * @param {*} options - Additional options like { width: 2 }.
  * @returns {boolean} - Success of update (if the element is found).
@@ -208,6 +217,18 @@ AutoGrid.prototype.updateChild = function (element, options) {
 
     return !!updated;
 
+};
+
+/**
+ * Triggers callback once specified child element changes its with (responsive).
+ */
+AutoGrid.prototype.onChildResize = function (element, callback) {
+    let child = this.getChild(element);
+    if (!child) return;
+    child.onResizeCallback.push(callback);
+    callback({
+        width: child.lastWidth
+    });
 };
 
 /**
@@ -280,6 +301,8 @@ AutoGrid.prototype.updateGrid = function () {
 
     leftFix = (this.COLUMNS - mx) * columnWidth / 2;
 
+    let blocksUpdatedWidth = [];
+
     for (i = 0; i < this.children.length; i++) {
 
         let block = this.children[i],
@@ -287,7 +310,13 @@ AutoGrid.prototype.updateGrid = function () {
             colIndices = inds[i],
             minTop = Math.max.apply(Math, colIndices.map(i => columnHeights[i])),
             left = colIndices[0] * columnWidth + leftFix + "px",
-            top = minTop + "px";
+            top = minTop + "px",
+            calculatedWidth = (columnWidth * colSpan) + "px";
+
+        if (block.lastWidth !== colSpan || block.container.style.width !== calculatedWidth) {
+            blocksUpdatedWidth.push(block);
+            block.lastWidth = colSpan;
+        }
 
         if (!block.container.parentNode) {
             block.container.style.left = left;
@@ -299,8 +328,8 @@ AutoGrid.prototype.updateGrid = function () {
                 block.container.style.left = left;
             if (block.container.style.top !== top)
                 block.container.style.top = top;
-            if (block.container.style.width !== (columnWidth * colSpan) + "px")
-                block.container.style.width = (columnWidth * colSpan) + "px";
+            if (block.container.style.width !== calculatedWidth)
+                block.container.style.width = calculatedWidth;
         }
 
         colIndices.forEach(index => {
@@ -326,6 +355,12 @@ AutoGrid.prototype.updateGrid = function () {
         this.updateSizes();
         return;
     }
+
+    blocksUpdatedWidth.forEach((block) => {
+        block.onResizeCallback.forEach(c => c({
+            width: block.lastWidth
+        }));
+    });
 
 };
 

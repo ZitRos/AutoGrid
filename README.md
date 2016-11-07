@@ -134,6 +134,9 @@ Removes any children of the grid.
 ##### disable()
 Removes any event listeners attached by the `AutoGrid`.
 
+##### onChildResize(element, callback)
+Once grid element resizes, the `callback({ width: 2 })` will be triggered. 
+
 ##### replaceChild(oldChild, newChild, keepOptions)
 Replaces child attached to the grid. `keepOptions` is true by default, switch it to reset grid
 element options.
