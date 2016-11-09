@@ -286,30 +286,15 @@ AutoGrid.prototype.updateGrid = function () {
         return rArr ? rArr : Array.from({ length: columnHeights.length }, (v, k) => k);
     }
 
-    let leftFix,
-        inds = [],
-        mx = 0;
-
-    for (i = 0; i < this.children.length; i++) {
-        let block = this.children[i],
-            colSpan = Math.min(block.width || 1, this.COLUMNS),
-            ind = getNextColumnIndices(colSpan);
-        inds.push(ind);
-        if (ind[0] + colSpan > mx)
-            mx = ind[0] + colSpan;
-    }
-
-    leftFix = (this.COLUMNS - mx) * columnWidth / 2;
-
     let blocksUpdatedWidth = [];
 
     for (i = 0; i < this.children.length; i++) {
 
         let block = this.children[i],
             colSpan = Math.min(block.width || 1, this.COLUMNS),
-            colIndices = inds[i],
+            colIndices = getNextColumnIndices(colSpan),
             minTop = Math.max.apply(Math, colIndices.map(i => columnHeights[i])),
-            left = colIndices[0] * columnWidth + leftFix + "px",
+            left = colIndices[0] * columnWidth + "px",
             top = minTop + "px",
             calculatedWidth = (columnWidth * colSpan) + "px";
 
